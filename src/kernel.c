@@ -1,12 +1,13 @@
 #include "lib-header/portio.h"
 #include "lib-header/stdtype.h"
 #include "lib-header/stdmem.h"
-#include "lib-header/gdt.h"
-// #include "lib-header/framebuffer.h"
+#include "lib-header/gdt.c"
+#include "lib-header/framebuffer.h"
 #include "lib-header/kernel_loader.h"
 #include "framebuffer.c"
 
 void kernel_setup(void) {
+    enter_protected_mode(&_gdt_gdtr);
     framebuffer_clear();
     framebuffer_write(3, 8,  'H', 0, 0xF);
     framebuffer_write(3, 9,  'a', 0, 0xF);
