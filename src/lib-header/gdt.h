@@ -31,6 +31,7 @@ struct SegmentDescriptor {
     uint8_t segment_present     : 1;
     uint8_t segment_limit       : 4;
     uint8_t flags               : 4;
+    uint8_t base_high           : 8;
 
     // TODO : Continue GDT definition
 

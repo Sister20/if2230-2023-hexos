@@ -14,7 +14,12 @@ struct GlobalDescriptorTable global_descriptor_table = {
             .base_low           = 0,
             .base_mid           = 0,
             .type_bit           = 0,
-            .non_system         = 0
+            .non_system         = 0,
+            .dpl                = 0,
+            .segment_present    = 0,
+            .segment_limit      = 0,
+            .flags              = 0,
+            .base_high          = 0
         },
         {
             // TODO : Implement
@@ -22,7 +27,12 @@ struct GlobalDescriptorTable global_descriptor_table = {
             .base_low           = 0,
             .base_mid           = 0,
             .type_bit           = 0xA,
-            .non_system         = 1
+            .non_system         = 1,
+            .dpl                = 0,
+            .segment_present    = 1,
+            .segment_limit      = 0,
+            .flags              = 0xC,
+            .base_high          = 0
         },
         {
             // TODO : Implement
@@ -30,7 +40,12 @@ struct GlobalDescriptorTable global_descriptor_table = {
             .base_low           = 0,
             .base_mid           = 0,
             .type_bit           = 0x2,
-            .non_system         = 1
+            .non_system         = 1,
+            .dpl                = 0,
+            .segment_present    = 1,
+            .segment_limit      = 0xF,
+            .flags              = 0xC,
+            .base_high          = 0
         }
     }
 };
@@ -41,9 +56,9 @@ struct GlobalDescriptorTable global_descriptor_table = {
  * From: https://wiki.osdev.org/Global_Descriptor_Table, GDTR.size is GDT size minus 1.
  */
 struct GDTR _gdt_gdtr = {
-    .size = sizeof(struct GlobalDescriptorTable) - 1,    // TODO : Implement, this is GDT size minus 1
-    .address = &global_descriptor_table    // TODO : Implement, this GDTR will point to global_descriptor_table. 
-    // Use sizeof operator
-
+     // TODO : Implement, this GDTR will point to global_descriptor_table.
+     // Use sizeof operator
+    .size = sizeof(struct GlobalDescriptorTable) - 1,
+    .address = &global_descriptor_table    
 };
 

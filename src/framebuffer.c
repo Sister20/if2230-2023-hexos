@@ -1,6 +1,6 @@
 #include "lib-header/framebuffer.h"
-#include "portio.c"
-#include "stdmem.c"
+#include "lib-header/portio.h"
+#include "lib-header/stdmem.h"
 /**
  * Terminal framebuffer
  * Resolution: 80x25
