@@ -56,9 +56,8 @@ struct IDTGate {
     uint8_t valid_bit   : 1;
     uint16_t offset_high;
 
-    /* yang bener yg mana sih... */
-
 } __attribute__((packed));
+
 
 /**
  * Interrupt Descriptor Table, containing lists of IDTGate.
@@ -74,18 +73,21 @@ struct InterruptDescriptorTable {
     struct IDTGate table[IDT_MAX_ENTRY_COUNT];
 };
 
+
 /**
  * IDTR, carrying information where's the IDT located and size.
  * Global kernel variable defined at idt.c.
  *
  * ...
+ * @param size     Interrupt Descriptor Table size
+ * @param address  IDT address
  */
 // TODO : Implement
 // ...
 
 struct IDTR {
-    uint16_t limit;
-    struct InterruptDesctiptorTable *address;
+    uint16_t size;
+    struct InterruptDescriptorTable *address;
 } __attribute__((packed));
 
 
