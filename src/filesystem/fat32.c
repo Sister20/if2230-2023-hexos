@@ -1,5 +1,6 @@
-#include "../lib-header/stdtype.h"
 #include "fat32.h"
+#include "disk.h"
+#include "../lib-header/stdtype.h"
 #include "../lib-header/stdmem.h"
 
 const uint8_t fs_signature[BLOCK_SIZE] = {
@@ -35,7 +36,7 @@ void init_directory_table(struct FAT32DirectoryTable *dir_table, char *name, uin
 }
 
 bool is_empty_storage(void){
-    read_clusters(fat_state.cluster_buf.buf, fs_signature, 1);
+    read_clusters(fat_state.cluster_buf.buf, (uint32_t)fs_signature, 1);
     return memcmp(fat_state.cluster_buf.buf, BOOT_SECTOR, BLOCK_SIZE) == 1;
 }
 

@@ -42,6 +42,30 @@ bool is_keyboard_blocking() {
   return keyboard_state.keyboard_input_on;
 }
 
+char framebuffer_read(uint16_t cursor_x, uint16_t cursor_y) {
+    uint16_t index = (cursor_y * 80) + cursor_x;
+    uint8_t* fb = MEMORY_FRAMEBUFFER;
+
+    return fb[index * 2];
+}
+
+int framebuffer_get_num_chars(void) {
+    uint8_t cursor_x, cursor_y;
+    framebuffer_get_cursor(&cursor_x, &cursor_y);
+    return (cursor_y * 80) + cursor_x;
+}
+
+int framebuffer_get_width() {
+    uint16_t fb_width;
+    out(0x3D4, 0x0F);
+    fb_width = in(0x3D5) << 8;
+    out(0x3D4, 0x0E);
+    fb_width |= in(0x3D5);
+    return fb_width;
+}
+
+
+
 void keyboard_isr(void) {
     if (!keyboard_state.keyboard_input_on) {
         keyboard_state.buffer_index = 0;
@@ -52,6 +76,8 @@ void keyboard_isr(void) {
         uint8_t cursor_x, cursor_y;
         static bool last_key_pressed = FALSE;
         static bool make_code = FALSE;
+        char* framebuffer = (char*) 0xB8000;
+
         
         if (!is_keyboard_blocking()) {
             keyboard_state.buffer_index = 0;
@@ -80,19 +106,37 @@ void keyboard_isr(void) {
                                 } 
                             } else {
                                 framebuffer_set_cursor(cursor_x, cursor_y - 1);
-                                framebuffer_write(cursor_x, cursor_y - 1, ' ', 0x0F, 0X00);
+                                framebuffer_write(cursor_x, cursor_y - 1, ' ', 0xF, 0);
+                                for (int i = cursor_y; i < 79; i++) {
+                                    char c = *(framebuffer + ((cursor_x * 80) + i) * 2);
+                                    framebuffer_write(cursor_x, i - 1, c, 0xF, 0);
+                                    framebuffer_write(cursor_x, i, 0, 0xF, 0);
+                                }
                             }
                         }
-                        break;          
+                        break;    
                     default:
                         keyboard_state.keyboard_buffer[keyboard_state.buffer_index++] = last_key_pressed;
                         framebuffer_get_cursor(&cursor_x, &cursor_y);
+
                         if (cursor_y == 79) {
+                            if (*(framebuffer + ((cursor_x * 80) + cursor_y) * 2) != ' ') {
+                                for (int i = cursor_y - 1; i >= 0; i--) {
+                                    char temp_char = *(framebuffer + ((cursor_x * 80) + i) * 2);
+                                    framebuffer_write(cursor_x, i + 1, temp_char, 0x0F, 0x00);
+                                }
+                            }
                             framebuffer_write(cursor_x, cursor_y, last_key_pressed, 0x0F, 0x00);
                             framebuffer_set_cursor(cursor_x + 1, 0);
                             cursor_x++;
                             cursor_y = 0;
                         } else {
+                            if (*(framebuffer + ((cursor_x * 80) + cursor_y) * 2) != ' ') {
+                                for (int i = 78; i > cursor_y; i--) {
+                                    char temp_char = *(framebuffer + ((cursor_x * 80) + i) * 2);
+                                    framebuffer_write(cursor_x, i + 1, temp_char, 0x0F, 0x00);
+                                }
+                            }
                             framebuffer_write(cursor_x, cursor_y, last_key_pressed, 0x0F, 0x00);
                             framebuffer_set_cursor(cursor_x, cursor_y + 1);
                             cursor_y++;
@@ -107,7 +151,7 @@ void keyboard_isr(void) {
                     if (cursor_y == 79) {
                         framebuffer_set_cursor(cursor_x + 1, 0);
                     } else {
-                        if (cursor_y == keyboard_state.buffer_index) {
+                        if (*(framebuffer + ((cursor_x * 80) + cursor_y + 1) * 2) == ' ') {
                             framebuffer_set_cursor(cursor_x, cursor_y);
                         } else {
                             framebuffer_set_cursor(cursor_x, cursor_y + 1);
