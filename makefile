@@ -30,7 +30,7 @@ clean:
 
 kernel:
 	@$(ASM) $(AFLAGS) $(SOURCE_FOLDER)/kernel_loader.s -o $(OUTPUT_FOLDER)/kernel_loader.o
-	@$(ASM) $(AFLAGS) $(SOURCE_FOLDER)/interrupt/intsetup.s -o $(OUTPUT_FOLDER)/intsetup.o
+	@$(ASM) $(AFLAGS) $(SOURCE_FOLDER)/interrupt/insetup.s -o $(OUTPUT_FOLDER)/insetup.o
 	
 # TODO: Compile C file with CFLAGS
 	@$(CC) $(CFLAGS) $(SOURCE_FOLDER)/kernel.c -o $(OUTPUT_FOLDER)/kernel.o

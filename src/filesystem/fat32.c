@@ -1,5 +1,6 @@
-#include "../lib-header/stdtype.h"
 #include "fat32.h"
+#include "disk.h"
+#include "../lib-header/stdtype.h"
 #include "../lib-header/stdmem.h"
 
 const uint8_t fs_signature[BLOCK_SIZE] = {
