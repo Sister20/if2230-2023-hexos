@@ -1,4 +1,4 @@
-#include "lib-header/disk.h"
+#include "disk.h"
 #include "lib-header/portio.h"
 
 static void ATA_busy_wait() {
@@ -49,4 +49,3 @@ void write_blocks(const void *ptr, uint32_t logical_block_address, uint8_t block
             out16(0x1F0, ((uint16_t*) ptr)[HALF_BLOCK_SIZE*i + j]);
     }
 }
-

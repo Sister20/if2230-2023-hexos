@@ -5,6 +5,7 @@
 #include "lib-header/framebuffer.h"
 #include "lib-header/kernel_loader.h"
 #include "lib-header/framebuffer.h"
+#include "keyboard/keyboard.h"
 
 #include "interrupt/idt.h"
 #include "interrupt/interrupt.h"
@@ -37,11 +38,15 @@ void kernel_setup(void) {
     /* Milestone 2 Testing */
     /* Load IDT & Testing Interrupt*/
     pic_remap();
+    // activate_keyboard_interrupt();
     initialize_idt();
     framebuffer_clear();
     framebuffer_set_cursor(0, 0);
-    __asm__("int $0x4");
+    // __asm__("int $0x4");
+    while (TRUE){
+        keyboard_state_activate();
+    }
 
     // framebuffer_set_cursor(5, 19);
-    while (TRUE);
+    // while (TRUE);
 }
