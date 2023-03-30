@@ -285,3 +285,26 @@ int8_t write(struct FAT32DriverRequest request){
     }
     return 0;
 }
+
+int8_t _delete(struct FAT32DriverRequest request){
+    // struct FAT32DirectoryEntry entry;
+    read_clusters(&fat_state.dir_table_buf, request.parent_cluster_number, 1);
+    uint8_t i;
+    for (i=0; i < CLUSTER_SIZE/sizeof(struct FAT32DirectoryEntry); i++){
+        if ((memcmp(fat_state.dir_table_buf.table[i].name, request.name,8) == 0) &&
+            (memcmp(fat_state.dir_table_buf.table[i].ext, request.ext, 3) == 0) &&
+            (fat_state.dir_table_buf.table[i].cluster_high == (uint16_t) (request.parent_cluster_number & 0xFFFF)) &&
+            (fat_state.dir_table_buf.table[i].cluster_low == (uint16_t) (request.parent_cluster_number >> 16))){
+                write_clusters(&fat_state.fat_table, FAT_CLUSTER_NUMBER, 1);
+                break;
+                return 0;
+        }
+    }
+
+    if (i == (CLUSTER_SIZE/sizeof(struct FAT32DirectoryEntry)-1)){
+        return 1;
+    }
+    else{
+        return -1;
+    }
+}

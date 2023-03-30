@@ -51,9 +51,9 @@ void kernel_setup(void) {
     // If read properly, readcbuf should filled with 'a'
 
     request.buffer_size = CLUSTER_SIZE;
-    read(request);   // Failed read due not enough buffer size
+    // read(request);   // Failed read due not enough buffer size
     request.buffer_size = 5*CLUSTER_SIZE;
-    read(request);   // Success read on file "daijoubu"
+    // read(request);   // Success read on file "daijoubu"
 
     while (TRUE);
 }
