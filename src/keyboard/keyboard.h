@@ -55,12 +55,6 @@ void get_keyboard_buffer(char *buf);
 // Check whether keyboard ISR is active or not - @return Equal with keyboard_input_on value
 bool is_keyboard_blocking(void);
 
-char framebuffer_read(uint16_t cursor_x, uint16_t cursor_y);
-
-int framebuffer_get_num_chars(void);
-
-int framebuffer_get_width();
-
 
 
 /* -- Keyboard Interrupt Service Routine -- */

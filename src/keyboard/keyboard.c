@@ -42,29 +42,6 @@ bool is_keyboard_blocking() {
   return keyboard_state.keyboard_input_on;
 }
 
-char framebuffer_read(uint16_t cursor_x, uint16_t cursor_y) {
-    uint16_t index = (cursor_y * 80) + cursor_x;
-    uint8_t* fb = MEMORY_FRAMEBUFFER;
-
-    return fb[index * 2];
-}
-
-int framebuffer_get_num_chars(void) {
-    uint8_t cursor_x, cursor_y;
-    framebuffer_get_cursor(&cursor_x, &cursor_y);
-    return (cursor_y * 80) + cursor_x;
-}
-
-int framebuffer_get_width() {
-    uint16_t fb_width;
-    out(0x3D4, 0x0F);
-    fb_width = in(0x3D5) << 8;
-    out(0x3D4, 0x0E);
-    fb_width |= in(0x3D5);
-    return fb_width;
-}
-
-
 
 void keyboard_isr(void) {
     if (!keyboard_state.keyboard_input_on) {
