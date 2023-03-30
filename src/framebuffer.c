@@ -61,3 +61,14 @@ void framebuffer_clear(void){
         }
     }
 }
+
+void framebuffer_get_cursor(uint8_t* cursor_x, uint8_t* cursor_y) {
+    uint16_t pos;
+    // get current cursor position
+    out(CURSOR_PORT_CMD, 0x0F);
+    pos = in(CURSOR_PORT_DATA);
+    out(CURSOR_PORT_CMD, 0x0E);
+    pos |= ((uint16_t)in(CURSOR_PORT_DATA)) << 8;
+    *cursor_x = pos / 80;
+    *cursor_y = pos % 80;
+}
