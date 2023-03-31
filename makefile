@@ -22,7 +22,7 @@ run: all
 	@qemu-system-i386 -s -drive file=bin/storage.bin,format=raw,if=ide,index=0,media=disk -cdrom $(OUTPUT_FOLDER)/$(ISO_NAME).iso
 	
 disk:
-	@qemu-img create -f raw $(OUTPUT_FOLDER)/$(DISK_NAME).bin 4M
+	qemu-img create -f raw $(OUTPUT_FOLDER)/$(DISK_NAME).bin 4M
 all: build
 build: iso
 clean:
@@ -44,6 +44,8 @@ kernel:
 	@$(CC) $(CFLAGS) $(SOURCE_FOLDER)/keyboard/keyboard.c -o $(OUTPUT_FOLDER)/keyboard.o
 	@$(CC) $(CFLAGS) $(SOURCE_FOLDER)/filesystem/disk.c -o $(OUTPUT_FOLDER)/disk.o
 	@$(CC) $(CFLAGS) $(SOURCE_FOLDER)/filesystem/fat32.c -o $(OUTPUT_FOLDER)/fat32.o
+
+	@$(CC) $(CFLAGS) $(SOURCE_FOLDER)/paging/paging.c -o $(OUTPUT_FOLDER)/paging.o
 # end TODO
 
 	@$(LIN) $(LFLAGS) bin/*.o -o $(OUTPUT_FOLDER)/kernel
