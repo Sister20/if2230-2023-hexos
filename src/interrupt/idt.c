@@ -1,7 +1,6 @@
 #include "idt.h"
 
-void *isr_stub_table[ISR_STUB_TABLE_LIMIT];
-
+// Empty IDT
 struct InterruptDescriptorTable interrupt_descriptor_table =
 {
     /* data */
@@ -20,6 +19,7 @@ struct InterruptDescriptorTable interrupt_descriptor_table =
     }}
 };
 
+// _idt_idtr, predefined IDTR
 struct IDTR _idt_idtr = {
     /* data */
     .limit = sizeof(struct InterruptDescriptorTable) - 1,

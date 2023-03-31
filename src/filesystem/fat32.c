@@ -13,19 +13,15 @@ const uint8_t fs_signature[BLOCK_SIZE] = {
     [BLOCK_SIZE-1] = 'k',
 };
 
+// Static Driver State
 static struct FAT32DriverState fat_state;
 
-// static uint8_t fat32_buffer[BLOCK_SIZE];
-// static struct FAT32FileAllocationTable fat32_fat;
-// static struct FAT32DirectoryEntry fat32_root_dir;
-
-// static uint32_t fat32_current_cluster;
-// static uint32_t fat32_current_dir_cluster;
-
+// Convert cluster number to LBA
 uint32_t cluster_to_lba(uint32_t cluster){
     return (cluster) * CLUSTER_BLOCK_COUNT;
 }
 
+// Initialize directory table
 void init_directory_table(struct FAT32DirectoryTable *dir_table, char *name, uint32_t parent_dir_cluster){
     memcpy(dir_table->table[0].name, name, 8);
     dir_table->table[0].attribute = ATTR_SUBDIRECTORY;
@@ -35,11 +31,14 @@ void init_directory_table(struct FAT32DirectoryTable *dir_table, char *name, uin
     dir_table->table[0].filesize = 0;
 }
 
+// Checking if storage is empty
 bool is_empty_storage(void){
-    read_clusters(fat_state.cluster_buf.buf, (uint32_t) fs_signature, 1);
-    return memcmp(fat_state.cluster_buf.buf, BOOT_SECTOR, BLOCK_SIZE) == 1;
+    uint8_t buf[BLOCK_SIZE];
+    read_blocks(buf, BOOT_SECTOR, 1);
+    return memcmp(buf, fs_signature, BLOCK_SIZE);
 }
 
+// Create FAT32 filesystem
 void create_fat32(void){
     // Copy signature to boot sector
     memcpy(fat_state.cluster_buf.buf, fs_signature, BLOCK_SIZE);
@@ -50,6 +49,7 @@ void create_fat32(void){
     fat_state.fat_table.cluster_map[ROOT_CLUSTER_NUMBER] = FAT32_FAT_END_OF_FILE;
 
     // Initialize root directory
+    // read_clusters(&fat_state.dir_table_buf, ROOT_CLUSTER_NUMBER, 1);
     init_directory_table(&fat_state.dir_table_buf, "root", ROOT_CLUSTER_NUMBER); 
 
     // Write reserved clusters
@@ -58,6 +58,7 @@ void create_fat32(void){
     write_clusters(fat_state.dir_table_buf.table, ROOT_CLUSTER_NUMBER, 1);   
 }
 
+// Initialize filesystem
 void initialize_filesystem_fat32(void){
     if (is_empty_storage()){
         create_fat32();
