@@ -3,6 +3,7 @@
     "files.associations": {
         "framebuffer.h": "c",
         "fat32.h": "c",
-        "portio.h": "c"
+        "portio.h": "c",
+        "interrupt.h": "c"
     },
 }

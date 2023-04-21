@@ -13,7 +13,7 @@
 #include "filesystem/disk.h"
 
 void kernel_setup(void) {
-    // enter_protected_mode(&_gdt_gdtr);
+    enter_protected_mode(&_gdt_gdtr);
 
     /* Milestone 1 Testing */
     // framebuffer_clear();
@@ -40,11 +40,16 @@ void kernel_setup(void) {
     /* Milestone 2 Testing */
     pic_remap();
     initialize_idt();
-    // activate_keyboard_interrupt();
+    activate_keyboard_interrupt();
     framebuffer_clear();
     framebuffer_set_cursor(0, 0);
-    initialize_filesystem_fat32();
-    // keyboard_state_activate();
+    // __asm__("int $0x4");                                 // INTERRUPT
+    while (TRUE)
+    {
+        keyboard_state_activate();                          // KEYBOARD DRIVER
+    }
+    // initialize_filesystem_fat32();
+    
 
     // struct ClusterBuffer cbuf[5];
     // for (uint32_t i = 0; i < 5; i++)
