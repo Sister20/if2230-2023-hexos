@@ -206,7 +206,47 @@ void read_clusters(void *ptr, uint32_t cluster_number, uint8_t cluster_count);
 
 
 
-/* -- CRUD Operation -- */
+/* -- CRUD Helping function -- */
+
+/**
+ * Find empty cluster to write in fat table
+ * @return i: valid cluster number, 0: invalid (no empty cluster)
+ */
+uint32_t findEmptyCluster(void);
+
+/**
+ * Find empty directory entry in directory table
+ * @return i: valid entry number, 0: invalid (no empty entry)
+ */
+uint8_t findEmptyEntry(struct FAT32DirectoryEntry *entry);
+
+/**
+ * Is the parent directory a directory?
+ * @return 0: not a directory, 1: is a directory
+ */
+uint8_t isDirectory(struct FAT32DirectoryEntry *entry);
+
+/**
+ * Is there already exist a file/folder with the same name?
+ * @return 0: not exist, 1: exist
+ */
+uint8_t isExist(struct FAT32DriverRequest request, struct FAT32DirectoryEntry *entry);
+
+/**
+ * Main function to validate parent directory and existence of the requested file/folder
+ * @return 0: valid, 1: same file/folder already exist, 2: parent is invalid
+ */
+uint8_t validateWrite(struct FAT32DriverRequest request, struct FAT32DirectoryEntry *entry);
+
+/**
+ * Write directory entry (metadata) to parent directory table
+*/
+void writeEntry(struct FAT32DriverRequest request, struct FAT32DirectoryEntry *entry, uint32_t cluster_number, uint8_t entry_number);
+
+
+
+
+/* -- CRUD Primary Operation -- */
 
 /**
  *  FAT32 Folder / Directory read
