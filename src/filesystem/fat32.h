@@ -215,6 +215,12 @@ void read_clusters(void *ptr, uint32_t cluster_number, uint8_t cluster_count);
 uint32_t findEmptyCluster(void);
 
 /**
+ * Find next empty cluster to write from i
+ * @param i: Cluster number to start searching
+ * @return i: valid cluster number, 0: invalid (no empty cluster)
+ */
+uint32_t findNextEmptyCluster(uint32_t i);
+/**
  * Find empty directory entry in directory table
  * @return i: valid entry number, 0: invalid (no empty entry)
  */
@@ -284,6 +290,6 @@ int8_t write(struct FAT32DriverRequest request);
  * @param request buf and buffer_size is unused
  * @return Error code: 0 success - 1 not found - 2 folder is not empty - -1 unknown
  */
-int8_t _delete(struct FAT32DriverRequest request);
+int8_t delete(struct FAT32DriverRequest request);
 
 #endif
