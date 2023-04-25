@@ -100,7 +100,7 @@ struct PageDriverState {
  * @param virtual_addr  Virtual address to map
  * @param flag          Page entry flags
  */
-void update_page_directory(void *physical_addr, void *virtual_addr, struct PageDirectoryEntryFlag flag);
+void update_page_directory_entry(void *physical_addr, void *virtual_addr, struct PageDirectoryEntryFlag flag);
 
 /**
  * flush_single_tlb, 
