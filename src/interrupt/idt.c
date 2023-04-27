@@ -1,7 +1,6 @@
 #include "idt.h"
 
-void *isr_stub_table[ISR_STUB_TABLE_LIMIT];
-
+// Empty IDT
 struct InterruptDescriptorTable interrupt_descriptor_table =
 {
     /* data */
@@ -20,10 +19,11 @@ struct InterruptDescriptorTable interrupt_descriptor_table =
     }}
 };
 
+// _idt_idtr, predefined IDTR
 struct IDTR _idt_idtr = {
     /* data */
     .limit = sizeof(struct InterruptDescriptorTable) - 1,
-    .IDTR = &interrupt_descriptor_table.table[1]
+    .IDTR = &interrupt_descriptor_table.table[0]
 };
 
 void initialize_idt(void) {
@@ -36,7 +36,7 @@ void initialize_idt(void) {
    * Segment: GDT_KERNEL_CODE_SEGMENT_SELECTOR
    * Privilege: 0
    */
-  for (int i = 0; i < ISR_STUB_TABLE_LIMIT; i++) {
+    for (int i = 0; i < ISR_STUB_TABLE_LIMIT; i++) {
       set_interrupt_gate(i, isr_stub_table[i], GDT_KERNEL_CODE_SEGMENT_SELECTOR, 0);
     }
 

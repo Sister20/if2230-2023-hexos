@@ -31,7 +31,9 @@ extern struct IDTR _idt_idtr;
  * @param _r_bit_2    Reserved for idtgate type, bit length: 3
  * @param gate_32     Is this gate size 32-bit? If not then its 16-bit gate
  * @param _r_bit_3    Reserved for idtgate type, bit length: 1
- * ...
+ * @param privilege   Privilege level, bit length: 2
+ * @param valid_bit   Is this gate valid? If not then this is unused gate
+ * @param offset_high Higher 16-bit offset
  */
 struct IDTGate {
     // First 32-bit (Bit 0 to 31)
@@ -53,8 +55,7 @@ struct IDTGate {
 /**
  * Interrupt Descriptor Table, containing lists of IDTGate.
  * One IDT already defined in idt.c
- *
- * ...
+ * @param table IDTGate array
  */
 // TODO : Implement
 // ...
@@ -64,8 +65,8 @@ struct InterruptDescriptorTable {
 /**
  * IDTR, carrying information where's the IDT located and size.
  * Global kernel variable defined at idt.c.
- *
- * ...
+ * @param limit IDT size
+ * @param IDTR  IDT address
  */
 // TODO : Implement
 // ...
