@@ -19,6 +19,7 @@ struct GlobalDescriptorTable global_descriptor_table = {
             .dpl                = 0,
             .present            = 0,
             .segment_high       = 0,
+            .reserved           = 0,
             .long_mode          = 0,
             .operation_size     = 0,
             .granularity        = 0,
@@ -34,6 +35,7 @@ struct GlobalDescriptorTable global_descriptor_table = {
             .dpl                = 0,
             .present            = 1,
             .segment_high       = 0,
+            .reserved           = 0,
             .long_mode          = 0,
             .operation_size     = 1,
             .granularity        = 1,
@@ -49,6 +51,7 @@ struct GlobalDescriptorTable global_descriptor_table = {
             .dpl                = 0,
             .present            = 1,
             .segment_high       = 0xF,
+            .reserved           = 0,
             .long_mode          = 0,
             .operation_size     = 1,
             .granularity        = 1,
@@ -63,8 +66,10 @@ struct GlobalDescriptorTable global_descriptor_table = {
             .non_system         = 1,
             .dpl                = 3,
             .present            = 1,
-            .segment_high       = 0b1111,
-            .long_mode          = 1,
+            // .segment_high       = 0b1111,
+            .segment_high       = 0,
+            .reserved           = 0,
+            .long_mode          = 0,
             .operation_size     = 1,
             .granularity        = 1,
             .base_high          = 0
@@ -78,7 +83,9 @@ struct GlobalDescriptorTable global_descriptor_table = {
             .non_system         = 1,
             .dpl                = 3,
             .present            = 1,
-            .segment_high       = 0b1111,
+            // .segment_high       = 0b1111,
+            .segment_high       = 0xF,
+            .reserved           = 0,
             .long_mode          = 0,
             .operation_size     = 1,
             .granularity        = 1,
@@ -94,12 +101,13 @@ struct GlobalDescriptorTable global_descriptor_table = {
             .dpl                = 0,
             .present            = 1,
             .segment_high       = (sizeof(struct TSSEntry) & (0xF << 16)) >> 16,
+            .reserved           = 1,
             .long_mode          = 0,
             .operation_size     = 1,
             .granularity        = 0,
             .base_high          = 0
-        },
-        {0}
+        }
+        // {0}
     }
 };
 

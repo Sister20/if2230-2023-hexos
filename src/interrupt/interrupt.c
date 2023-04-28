@@ -3,9 +3,9 @@
 #include "lib-header/portio.h"
 #include "keyboard/keyboard.h"
 
-struct TSSEntry _interrupt_tss_entry = {
-    .ss0  = GDT_KERNEL_DATA_SEGMENT_SELECTOR,
-};
+struct TSSEntry _interrupt_tss_entry = {};
+//     .ss0  = GDT_KERNEL_DATA_SEGMENT_SELECTOR,
+// };
 
 void set_tss_kernel_current_stack(void) {
     uint32_t stack_ptr;
@@ -69,6 +69,12 @@ void main_interrupt_handler(
     __attribute__((unused)) struct InterruptStack info
 ) {
     switch (int_number) {
+        // case(0xe):
+        //     __asm__("hlt");
+        //     break;
+        // case (PIC1_OFFSET + IRQ_TIMER):
+        //     pic_ack(IRQ_TIMER);
+        //     break;
         case (PIC1_OFFSET + IRQ_KEYBOARD):
             keyboard_isr();
             break;

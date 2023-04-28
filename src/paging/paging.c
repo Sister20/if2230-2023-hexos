@@ -34,12 +34,15 @@ int8_t allocate_single_user_page_frame(void *virtual_addr) {
     uint32_t last_physical_addr = (uint32_t) page_driver_state.last_available_physical_addr;
 
     // TODO : Allocate Page Directory Entry with user privilege
-    update_page_directory_entry((void*) last_physical_addr, virtual_addr, (struct PageDirectoryEntryFlag) {
-        .present_bit        = 1,
-        .write_bit          = 1,
-        .user_supervisor    = 1,
-        .use_pagesize_4_mb  = 1,
-    });
+    if (last_physical_addr < 0x07FE0000) {
+        update_page_directory_entry((void*) last_physical_addr, virtual_addr, (struct PageDirectoryEntryFlag) {
+            .present_bit        = 1,
+            .write_bit          = 1,
+            .user_supervisor    = 1,
+            .use_pagesize_4_mb  = 1,
+        });
+        return 0;
+    }
     return -1;
 }
 
