@@ -13,6 +13,7 @@
 #include "filesystem/disk.h"
 #include "paging/paging.h"
 
+
 void kernel_setup(void) {
     enter_protected_mode(&_gdt_gdtr);
 
@@ -106,7 +107,9 @@ void kernel_setup(void) {
 
     // Set TSS $esp pointer and jump into shell 
     set_tss_kernel_current_stack();
+    // memset(0, 1, 10);            // Test page fault muncul 1
     kernel_execute_user_program((uint8_t *) 0);
+    
 
     while (TRUE);
 }

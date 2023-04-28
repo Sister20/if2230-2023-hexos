@@ -3,7 +3,7 @@
 #include "lib-header/portio.h"
 #include "keyboard/keyboard.h"
 
-struct TSSEntry _interrupt_tss_entry = {};
+struct TSSEntry _interrupt_tss_entry = {0};
 //     .ss0  = GDT_KERNEL_DATA_SEGMENT_SELECTOR,
 // };
 
