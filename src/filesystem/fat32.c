@@ -376,3 +376,8 @@ int8_t delete(struct FAT32DriverRequest request){
     }
     return 0;
 }
+
+char* get_dir_name(uint32_t cluster_number) {
+    read_clusters(&fat_state.dir_table_buf, cluster_number, 1);
+    return fat_state.dir_table_buf.table[0].name;
+}

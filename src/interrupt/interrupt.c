@@ -1,10 +1,10 @@
 #include "interrupt.h"
 #include "idt.h"
-#include "lib-header/stdmem.h"
-#include "lib-header/portio.h"
-#include "keyboard/keyboard.h"
-#include "lib-header/framebuffer.h"
-#include "filesystem/fat32.h"
+#include "../lib-header/stdmem.h"
+#include "../lib-header/portio.h"
+#include "../keyboard/keyboard.h"
+#include "../lib-header/framebuffer.h"
+#include "../filesystem/fat32.h"
 
 struct TSSEntry _interrupt_tss_entry = {
     .ss0  = GDT_KERNEL_DATA_SEGMENT_SELECTOR,
@@ -67,17 +67,17 @@ void activate_keyboard_interrupt(void) {
 }
 
 // USER MODE
-void puts(char* str, uint32_t len, uint32_t color) {
-    uint8_t row, col;
-    framebuffer_get_cursor(&row, &col);
-    for (uint32_t i = 0; i < len; i++) {
+void puts(char* str, uint32_t len, uint32_t color, uint8_t row, uint8_t col) {
+    uint8_t i;
+    for (i = 0; i < len; i++) {
         framebuffer_write(row, col + i, str[i], color, 0);
     }
-    framebuffer_set_cursor(row + 1, col);
+    framebuffer_set_cursor(row, col + i);
 }
 
-
 void syscall(struct CPURegister cpu, __attribute__((unused)) struct InterruptStack info) {
+    uint8_t row, col;
+    framebuffer_get_cursor(&row, &col);
     if (cpu.eax == 0) {
         struct FAT32DriverRequest request = *(struct FAT32DriverRequest*) cpu.ebx;
         *((int8_t*) cpu.ecx) = read(request);
@@ -89,12 +89,14 @@ void syscall(struct CPURegister cpu, __attribute__((unused)) struct InterruptSta
         get_keyboard_buffer(buf);
         memcpy((char *) cpu.ebx, buf, cpu.ecx);
     } else if (cpu.eax == 5) {
-        puts((char *) cpu.ebx, cpu.ecx, cpu.edx); // Modified puts() on kernel side
+        puts((char *) cpu.ebx, cpu.ecx, cpu.edx, row, col);
+        framebuffer_set_cursor(row + 1, 0);
+    } 
+    else if (cpu.eax == 6) {
+        puts((char *) cpu.ebx, cpu.ecx, cpu.edx, row, col);
     }
+
 }
-
-
-
 
 void main_interrupt_handler(
     __attribute__((unused)) struct CPURegister cpu,
@@ -102,12 +104,6 @@ void main_interrupt_handler(
     __attribute__((unused)) struct InterruptStack info
 ) {
     switch (int_number) {
-        // case(0xe):
-        //     __asm__("hlt");
-        //     break;
-        // case (PIC1_OFFSET + IRQ_TIMER):
-        //     pic_ack(IRQ_TIMER);
-        //     break;
         case (PIC1_OFFSET + IRQ_KEYBOARD):
             keyboard_isr();
             break;
