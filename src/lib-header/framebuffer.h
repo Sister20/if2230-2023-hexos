@@ -1,9 +1,9 @@
 #ifndef _FRAMEBUFFER_H
 #define _FRAMEBUFFER_H
 
-#include "lib-header/stdtype.h"
+#include "stdtype.h"
 
-#define MEMORY_FRAMEBUFFER (uint8_t *) 0xB8000
+#define MEMORY_FRAMEBUFFER (uint8_t *) 0xC00B8000
 #define CURSOR_PORT_CMD    0x03D4
 #define CURSOR_PORT_DATA   0x03D5
 
@@ -41,5 +41,12 @@ void framebuffer_set_cursor(uint8_t r, uint8_t c);
  * 
  */
 void framebuffer_clear(void);
+
+void framebuffer_get_cursor(uint8_t* cursor_x, uint8_t* cursor_y);
+
+
+
+
+
 
 #endif
