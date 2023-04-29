@@ -292,4 +292,6 @@ int8_t write(struct FAT32DriverRequest request);
  */
 int8_t delete(struct FAT32DriverRequest request);
 
+char* get_path(uint32_t cluster_number);
+
 #endif

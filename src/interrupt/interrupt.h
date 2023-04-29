@@ -144,4 +144,9 @@ void pic_remap(void);
  */
 void main_interrupt_handler(struct CPURegister cpu, uint32_t int_number, struct InterruptStack info);
 
+/**
+ * @param 5  text output
+ * @param 6  text output for cwd
+*/
+void syscall(struct CPURegister cpu, __attribute__((unused)) struct InterruptStack info);
 #endif
