@@ -22,7 +22,8 @@ run: all
 	@qemu-system-i386 -s -drive file=bin/storage.bin,format=raw,if=ide,index=0,media=disk -cdrom $(OUTPUT_FOLDER)/$(ISO_NAME).iso
 	
 disk:
-	qemu-img create -f raw $(OUTPUT_FOLDER)/$(DISK_NAME).bin 4M
+	@echo making disk...
+	@qemu-img create -f raw $(OUTPUT_FOLDER)/$(DISK_NAME).bin 4M
 all: build
 build: iso
 clean:
@@ -86,6 +87,6 @@ user-shell:
 	@size --target=binary bin/shell
 	@rm -f *.o
 
-insert-shell: inserter user-shell
+insert-shell: disk inserter user-shell
 	@echo Inserting shell into root directory...
 	@cd $(OUTPUT_FOLDER); ./inserter shell 2 $(DISK_NAME).bin

@@ -46,9 +46,10 @@ struct PageDirectoryEntryFlag {
  * @param global_page       Is this page translation global (also cannot be flushed)
  * @param ignored         
  * @param pat               Page Attribute Table (PAT) index
- * @param lower_address     Lower 8 bit (39:32) of physical address
+ * @param bits              Reserved bit
+ * @param lower_address     Lower 8 bit (31:22) of physical address
  * @param reserved          Reserved bit
- * @param higher_address    Higher 10 bit (31:22) of physical address
+ * @param higher_address    Higher 10 bit (39:32) of physical address
  * ...
  */
 struct PageDirectoryEntry {
@@ -58,10 +59,10 @@ struct PageDirectoryEntry {
     uint16_t global_page    : 1;
     uint16_t ignored        : 3;
     uint16_t pat            : 1;
-    uint16_t bits           : 4;
-    uint16_t lower_address  : 5;
-    uint16_t higher_address : 10;
-
+    uint16_t higher_address : 4;
+    uint16_t bits           : 5;
+    uint16_t lower_address  : 10;
+    
     // Note: Use uint16_t + bitfield here, Do not use uint8_t
 } __attribute__((packed));
 
@@ -77,7 +78,7 @@ struct PageDirectoryEntry {
 struct PageDirectory {
     // TODO : Implement
     struct PageDirectoryEntry table[PAGE_ENTRY_COUNT];
-} __attribute__((packed));
+} __attribute__((aligned(0x1000))) __attribute__((packed));
 
 /**
  * Containing page driver states

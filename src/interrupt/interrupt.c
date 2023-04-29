@@ -1,11 +1,14 @@
 #include "interrupt.h"
 #include "idt.h"
+#include "lib-header/stdmem.h"
 #include "lib-header/portio.h"
 #include "keyboard/keyboard.h"
+#include "lib-header/framebuffer.h"
+#include "filesystem/fat32.h"
 
-struct TSSEntry _interrupt_tss_entry = {0};
-//     .ss0  = GDT_KERNEL_DATA_SEGMENT_SELECTOR,
-// };
+struct TSSEntry _interrupt_tss_entry = {
+    .ss0  = GDT_KERNEL_DATA_SEGMENT_SELECTOR,
+};
 
 void set_tss_kernel_current_stack(void) {
     uint32_t stack_ptr;
@@ -63,6 +66,36 @@ void activate_keyboard_interrupt(void) {
     out(PIC2_DATA, PIC_DISABLE_ALL_MASK);
 }
 
+// USER MODE
+void puts(char* str, uint32_t len, uint32_t color) {
+    uint8_t row, col;
+    framebuffer_get_cursor(&row, &col);
+    for (uint32_t i = 0; i < len; i++) {
+        framebuffer_write(row, col + i, str[i], color, 0);
+    }
+    framebuffer_set_cursor(row + 1, col);
+}
+
+
+void syscall(struct CPURegister cpu, __attribute__((unused)) struct InterruptStack info) {
+    if (cpu.eax == 0) {
+        struct FAT32DriverRequest request = *(struct FAT32DriverRequest*) cpu.ebx;
+        *((int8_t*) cpu.ecx) = read(request);
+    } else if (cpu.eax == 4) {
+        keyboard_state_activate();
+        __asm__("sti"); // Due IRQ is disabled when main_interrupt_handler() called
+        while (is_keyboard_blocking());
+        char buf[KEYBOARD_BUFFER_SIZE];
+        get_keyboard_buffer(buf);
+        memcpy((char *) cpu.ebx, buf, cpu.ecx);
+    } else if (cpu.eax == 5) {
+        puts((char *) cpu.ebx, cpu.ecx, cpu.edx); // Modified puts() on kernel side
+    }
+}
+
+
+
+
 void main_interrupt_handler(
     __attribute__((unused)) struct CPURegister cpu,
     uint32_t int_number,
@@ -77,6 +110,9 @@ void main_interrupt_handler(
         //     break;
         case (PIC1_OFFSET + IRQ_KEYBOARD):
             keyboard_isr();
+            break;
+        case 0x30:
+            syscall(cpu, info);
             break;
         default:
             break;

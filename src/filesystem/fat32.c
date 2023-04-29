@@ -74,12 +74,12 @@ void initialize_filesystem_fat32(void){
 
 void write_clusters(const void *ptr, uint32_t cluster_number, uint8_t cluster_count){
     uint32_t lba = cluster_to_lba(cluster_number);
-    write_blocks(ptr, lba, cluster_count*4);
+    write_blocks(ptr, lba, cluster_count * 4);
 }
 
 void read_clusters(void *ptr, uint32_t cluster_number, uint8_t cluster_count){
     uint32_t lba = cluster_to_lba(cluster_number);
-    read_blocks(ptr, lba, cluster_count);
+    read_blocks(ptr, lba, cluster_count * 4);
 }
 
 
@@ -271,18 +271,18 @@ int8_t write(struct FAT32DriverRequest request){
 
     // WRITE FILE
     else{
-        // uint32_t total_clusters = ceil(request.buffer_size / CLUSTER_SIZE);
-        // uint32_t all_clusters[total_clusters];
         uint32_t remaining_bytes = request.buffer_size;
         uint32_t temp_cluster;
-        // uint32_t i = 0;
+        uint32_t n = 0;
+        
         while (remaining_bytes > 0){
-            // all_clusters[i] = cluster_number;
             temp_cluster = cluster_number;
+            
+            uint32_t offset = n * CLUSTER_SIZE;
 
             // Write cluster buffer to disk
             read_clusters(&fat_state.cluster_buf, temp_cluster, 1);
-            memcpy(fat_state.cluster_buf.buf, request.buf, CLUSTER_SIZE);
+            memcpy(fat_state.cluster_buf.buf, request.buf + offset, CLUSTER_SIZE);
             write_clusters(fat_state.cluster_buf.buf, temp_cluster, 1);
 
             // Update FAT table
@@ -301,12 +301,9 @@ int8_t write(struct FAT32DriverRequest request){
             write_clusters(fat_state.fat_table.cluster_map, FAT_CLUSTER_NUMBER, 1);
             
             remaining_bytes -= CLUSTER_SIZE;
+            n++;
         }
         write_clusters(fat_state.fat_table.cluster_map, FAT_CLUSTER_NUMBER, 1);
-        // read_clusters(&fat_state.cluster_buf, cluster_number, 1);
-        // memcpy(fat_state.cluster_buf.buf, request.buf, CLUSTER_SIZE);
-        // memcpy(fat_state.dir_table_buf.table, request.buf, request.buffer_size);
-        // write_clusters(fat_state.dir_table_buf.table, cluster_number, 1);
     }
     return 0;
 }
@@ -323,25 +320,24 @@ int8_t delete(struct FAT32DriverRequest request){
     if (request.parent_cluster_number < 2 || 
         request.parent_cluster_number > CLUSTER_MAP_SIZE ||
         isDir == 0) {
-        framebuffer_write(3,9, 'i', 0x0F, 0x00);
         return -1;
     }
      
     for (i = 1; i < CLUSTER_SIZE/sizeof(struct FAT32DirectoryEntry); i++){
-        framebuffer_write(3,9, 'u', 0x0F, 0x00);
+
         if ((memcmp(fat_state.dir_table_buf.table[i].name, request.name,8) == 0)){
-            framebuffer_write(3,7, 'l', 0x0F, 0x00);
+    
             if(fat_state.dir_table_buf.table[i].attribute == ATTR_SUBDIRECTORY ){
                 cluster_number = fat_state.dir_table_buf.table[i].cluster_high << 16 | fat_state.dir_table_buf.table[i].cluster_low;
                 read_clusters(&test, cluster_number, 1);
-                framebuffer_write(2,6, 'x', 0x0F, 0x00);
+        
                 for (uint8_t j = 1; j < CLUSTER_SIZE/sizeof(struct FAT32DirectoryEntry); j++){
                     if (test.table[j].user_attribute != 0){
                         // read_clusters(&test, request.parent_cluster_number, 1);
                         // struct FAT32DirectoryEntry empty_entry = {0};
                         // fat_state.dir_table_buf.table[i] = empty_entry;
                         // write_clusters(&test, cluster_number, 1);
-                        framebuffer_write(3,6, 'y', 0x0F, 0x00);
+                
 
                         return 2;
                     }
@@ -351,7 +347,7 @@ int8_t delete(struct FAT32DriverRequest request){
             }
             else{
                 for (uint8_t k = 1; k < (request.buffer_size/CLUSTER_SIZE); k++){
-                    framebuffer_write(3,6, 'a', 0x0F, 0x00);
+            
 
                     temp = fat_state.fat_table.cluster_map[k];
                     fat_state.fat_table.cluster_map[k] = 0;
@@ -363,15 +359,11 @@ int8_t delete(struct FAT32DriverRequest request){
                 continue;
             }
                 cluster_number = fat_state.dir_table_buf.table[i].cluster_high << 16 | fat_state.dir_table_buf.table[i].cluster_low;
-                framebuffer_write(3,3, cluster_number+48, 0x0F, 0x00);
-                uint16_t high = fat_state.dir_table_buf.table[i].cluster_high << 16;
-                framebuffer_write(1,1, high+48, 0x0F, 0x00);
-                uint16_t low = fat_state.dir_table_buf.table[i].cluster_low;
-                framebuffer_write(2,2, low+48, 0x0F, 0x00);
+        
                 fat_state.dir_table_buf.table[i].user_attribute = 0;
                 struct FAT32DirectoryEntry empty_entry = {0};
                 fat_state.dir_table_buf.table[i] = empty_entry;
-                framebuffer_write(4,4, i+48, 0x0F, 0x00);
+        
                 fat_state.fat_table.cluster_map[cluster_number] = 0x00000000;
                 write_clusters(&fat_state.fat_table, FAT_CLUSTER_NUMBER, 1);
                 write_clusters(fat_state.dir_table_buf.table, request.parent_cluster_number, 1);
