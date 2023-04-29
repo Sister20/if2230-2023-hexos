@@ -60,6 +60,9 @@ void keyboard_isr(void) {
             keyboard_state.buffer_index = 0;
         }
         else {
+            if (keyboard_state.buffer_index == 0) {
+                memset(keyboard_state.keyboard_buffer, 0, KEYBOARD_BUFFER_SIZE);
+            }
             if (mapped_char != 0) {
                 last_key_pressed = mapped_char;
                 make_code = TRUE;
@@ -67,9 +70,11 @@ void keyboard_isr(void) {
             else if (make_code) {
                 switch (last_key_pressed) {
                     case '\n':
-                        keyboard_state.keyboard_buffer[keyboard_state.buffer_index] = 0;
                         framebuffer_get_cursor(&cursor_x, &cursor_y);
+                        keyboard_state.keyboard_buffer[keyboard_state.buffer_index] = 0;
+                        keyboard_state.buffer_index = 0;
                         framebuffer_set_cursor(cursor_x + 1, 0);
+                        keyboard_state_deactivate();
                         break;
                     case '\b':
                         framebuffer_get_cursor(&cursor_x, &cursor_y);
