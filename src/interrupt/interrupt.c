@@ -77,45 +77,45 @@ void puts(char* str, uint32_t len, uint32_t color, uint8_t row, uint8_t col) {
     framebuffer_set_cursor(row, col + i);
 }
 
-void cmd_ls(struct FAT32DriverRequest request){
+void cmd_ls(struct FAT32DriverRequest request, uint8_t row, uint8_t col){
     read_clusters(&fat_state.dir_table_buf, request.parent_cluster_number, 1);
     for(int i =0;i<64; i++){
         if (fat_state.dir_table_buf.table[i].name[0] != 0x00) {
-            puts(fat_state.dir_table_buf.table[i].name, 8, 0xF);
+            puts(fat_state.dir_table_buf.table[i].name, 8, 0xF, row, col);
         }
     }   
 }
 
-void cmd_mkdir(struct FAT32DriverRequest request, struct CPURegister cpu){
+void cmd_mkdir(struct FAT32DriverRequest request, struct CPURegister cpu, uint8_t row, uint8_t col){
     *((int8_t*) cpu.ecx) = write(request);
     // puts("yayyy", 5, 0xF);
     if (cpu.ecx == (int8_t) 0){
-        puts("Folder has been created", 24, 0xF);
+        puts("Folder has been created", 24, 0xF, row, col);
     }
     else{
-        puts("Error", 5, 0xF);
+        puts("Error", 5, 0xF, row, col);
     }
 }
 
-void cmd_rm(struct FAT32DriverRequest request, struct CPURegister cpu){
-    *((int8_t*) cpu.ecx) = delete(request);
-    // puts("yyy", 5, 0xF);
-    if (cpu.ecx == (int8_t) 0){
-        puts("Folder has been removed", 24, 0xF);
-    }
-    else{
-        puts("Error", 5, 0xF);
-    }
-}
+// void cmd_rm(struct FAT32DriverRequest request, struct CPURegister cpu){
+//     *((int8_t*) cpu.ecx) = delete(request);
+//     // puts("yyy", 5, 0xF);
+//     if (cpu.ecx == (int8_t) 0){
+//         puts("Folder has been removed", 24, 0xF);
+//     }
+//     else{
+//         puts("Error", 5, 0xF);
+//     }
+// }
 
-void cmd_cat(struct FAT32DriverRequest request){
-    read_clusters(&fat_state.dir_table_buf, request.parent_cluster_number, 1);
-    for(int i =0;i<64; i++){
-        if (fat_state.dir_table_buf.table[i].name[0] != 0x00) {
-            puts(fat_state.dir_table_buf.table[i].name, 8, 0xF);
-        }
-    }   
-}
+// void cmd_cat(struct FAT32DriverRequest request){
+//     read_clusters(&fat_state.dir_table_buf, request.parent_cluster_number, 1);
+//     for(int i =0;i<64; i++){
+//         if (fat_state.dir_table_buf.table[i].name[0] != 0x00) {
+//             puts(fat_state.dir_table_buf.table[i].name, 8, 0xF);
+//         }
+//     }   
+// }
 
 void syscall(struct CPURegister cpu, __attribute__((unused)) struct InterruptStack info) {
     uint8_t row, col;
@@ -145,11 +145,11 @@ void syscall(struct CPURegister cpu, __attribute__((unused)) struct InterruptSta
         .parent_cluster_number = ROOT_CLUSTER_NUMBER,
         .buffer_size           = 0x100000,
     };
-        cmd_ls(request);
+        cmd_ls(request, row, col);
     }
     else if(cpu.eax == 10){
         struct FAT32DriverRequest request = *(struct FAT32DriverRequest*) cpu.ebx;
-        cmd_mkdir(request, cpu);
+        cmd_mkdir(request, cpu, row, col);
     }
     
     // else if (cpu.eax == 11){

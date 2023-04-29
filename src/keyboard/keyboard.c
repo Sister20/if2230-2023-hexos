@@ -53,9 +53,8 @@ void keyboard_isr(void) {
         uint8_t cursor_x, cursor_y;
         static bool last_key_pressed = FALSE;
         static bool make_code = FALSE;
-        char* framebuffer = (char*) 0xB8000;
+        // char* framebuffer = (char*) 0xB8000;
 
-        
         if (!is_keyboard_blocking()) {
             keyboard_state.buffer_index = 0;
         }
@@ -82,43 +81,41 @@ void keyboard_isr(void) {
                             keyboard_state.buffer_index--;
                             if (cursor_y == 0) {
                                 if (cursor_x > 0) {
-                                    cursor_y = 79;
-                                    framebuffer_set_cursor(cursor_x - 1, cursor_y);
-                                    framebuffer_write(cursor_x - 1, cursor_y, ' ', 0x0F, 0X00);
+                                    framebuffer_set_cursor(cursor_x - 1, 79);
+                                    framebuffer_write(cursor_x - 1, 79, ' ', 0xF, 0);
                                 } 
                             } else {
                                 framebuffer_set_cursor(cursor_x, cursor_y - 1);
                                 framebuffer_write(cursor_x, cursor_y - 1, ' ', 0xF, 0);
-                                for (int i = cursor_y; i < 79; i++) {
-                                    char c = *(framebuffer + ((cursor_x * 80) + i) * 2);
-                                    framebuffer_write(cursor_x, i - 1, c, 0xF, 0);
-                                    framebuffer_write(cursor_x, i, 0, 0xF, 0);
-                                }
+                                // for (int i = cursor_y; i < 254; i++) {
+                                //     char c = *(framebuffer + ((cursor_x * 80) + i) * 2);
+                                //     framebuffer_write(cursor_x, i - 1, c, 0xF, 0);
+                                //     framebuffer_write(cursor_x, i, 0, 0xF, 0);
+                                // }
                             }
                         }
                         break;    
                     default:
                         keyboard_state.keyboard_buffer[keyboard_state.buffer_index++] = last_key_pressed;
                         framebuffer_get_cursor(&cursor_x, &cursor_y);
-
                         if (cursor_y == 79) {
-                            if (*(framebuffer + ((cursor_x * 80) + cursor_y) * 2) != ' ') {
-                                for (int i = cursor_y - 1; i >= 0; i--) {
-                                    char temp_char = *(framebuffer + ((cursor_x * 80) + i) * 2);
-                                    framebuffer_write(cursor_x, i + 1, temp_char, 0x0F, 0x00);
-                                }
-                            }
+                            // if (keyboard_state.keyboard_buffer[keyboard_state.buffer_index - 1] == '\n') {
+                            //     for (int i = cursor_y - 1; i >= 0; i--) {
+                            //         char temp_char = *(framebuffer + ((cursor_x * 80) + i) * 2);
+                            //         framebuffer_write(cursor_x, i + 1, temp_char, 0x0F, 0x00);
+                            //     }
+                            // }
                             framebuffer_write(cursor_x, cursor_y, last_key_pressed, 0x0F, 0x00);
                             framebuffer_set_cursor(cursor_x + 1, 0);
                             cursor_x++;
                             cursor_y = 0;
                         } else {
-                            if (*(framebuffer + ((cursor_x * 80) + cursor_y) * 2) != ' ') {
-                                for (int i = 78; i > cursor_y; i--) {
-                                    char temp_char = *(framebuffer + ((cursor_x * 80) + i) * 2);
-                                    framebuffer_write(cursor_x, i + 1, temp_char, 0x0F, 0x00);
-                                }
-                            }
+                            // if (cursor_y < keyboard_state.buffer_index) {
+                            //     for (int i = 254; i > cursor_y; i--) {
+                            //         char temp_char = *(framebuffer + ((cursor_x * 80) + i) * 2);
+                            //         framebuffer_write(cursor_x, i + 1, temp_char, 0x0F, 0x00);
+                            //     }
+                            // }
                             framebuffer_write(cursor_x, cursor_y, last_key_pressed, 0x0F, 0x00);
                             framebuffer_set_cursor(cursor_x, cursor_y + 1);
                             cursor_y++;
@@ -130,37 +127,65 @@ void keyboard_isr(void) {
             switch (scancode) {
                 case EXT_SCANCODE_RIGHT:
                     framebuffer_get_cursor(&cursor_x, &cursor_y);
-                    if (cursor_y == 79) {
-                        framebuffer_set_cursor(cursor_x + 1, 0);
-                    } else {
-                        if (*(framebuffer + ((cursor_x * 80) + cursor_y + 1) * 2) == ' ') {
-                            framebuffer_set_cursor(cursor_x, cursor_y);
-                        } else {
+                    uint8_t currentBaris = cursor_x;
+                    uint8_t nBaris = keyboard_state.buffer_index / 80;
+                    uint8_t baris = currentBaris - nBaris;
+                    uint8_t kolom = keyboard_state.buffer_index % 80;
+                    if (keyboard_state.buffer_index > 79) {
+                        if (cursor_x <= currentBaris && cursor_x >= baris) {
+                            if (cursor_y == 79) {
+                                if (cursor_x < 24) {
+                                    framebuffer_set_cursor(cursor_x + 1, 0);
+                                }
+                            }
+                            else if (cursor_y < 79) {
+                                framebuffer_set_cursor(cursor_x, cursor_y + 1);
+                            }
+                        }
+                        else if (cursor_x == currentBaris - 1) {
+                            if (cursor_y < kolom) {
+                                framebuffer_set_cursor(cursor_x, cursor_y + 1);
+                            } else {
+                                framebuffer_set_cursor(cursor_x, cursor_y);
+                            }
+                        }
+                    }
+                    else {
+                        if (cursor_y < keyboard_state.buffer_index) {
                             framebuffer_set_cursor(cursor_x, cursor_y + 1);
+                        } else {
+                            framebuffer_set_cursor(cursor_x, cursor_y);
                         }
                     }
                     break;
                 case EXT_SCANCODE_LEFT:
                     framebuffer_get_cursor(&cursor_x, &cursor_y);
-                    if (cursor_y == 0) {
-                        if (cursor_x > 0) {
-                            framebuffer_set_cursor(cursor_x - 1, 79);
+                    uint8_t barisL = cursor_x - (keyboard_state.buffer_index / 80);
+                    if (keyboard_state.buffer_index > 80) {
+                        if (cursor_x != barisL) {
+                            if (cursor_y == 0) {
+                                if (cursor_x > 0) {
+                                    framebuffer_set_cursor(cursor_x - 1, 79);
+                                }
+                            } else {
+                                framebuffer_set_cursor(cursor_x, cursor_y - 1);
+                            }
                         }
                     } else {
-                        framebuffer_set_cursor(cursor_x, cursor_y - 1);
+                        if (cursor_y > 0) {
+                            framebuffer_set_cursor(cursor_x, cursor_y - 1);
+                        } else {
+                            framebuffer_set_cursor(cursor_x, cursor_y);
+                        }
                     }
                     break;
                 case EXT_SCANCODE_UP:
                     framebuffer_get_cursor(&cursor_x, &cursor_y);
-                    if (cursor_x > 0) {
-                        framebuffer_set_cursor(cursor_x - 1, cursor_y);
-                    }
+                    framebuffer_set_cursor(cursor_x, cursor_y);
                     break;
                 case EXT_SCANCODE_DOWN:
                     framebuffer_get_cursor(&cursor_x, &cursor_y);
-                    if (cursor_x < 24) {
-                        framebuffer_set_cursor(cursor_x + 1, cursor_y);
-                    }
+                    framebuffer_set_cursor(cursor_x, cursor_y);
                     break;
                 default:
                     break;
